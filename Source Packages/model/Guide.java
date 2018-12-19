@@ -6,6 +6,7 @@ import java.util.List;
 import dto.GuideDTO;
 import dto.LanguageDTO;
 import dto.ShowDTO;
+import dto.TourDTO;
 import exception.NoResultException;
 import integration.DBHandler;
 
@@ -161,5 +162,48 @@ public class Guide {
      */
     public GuideDTO getGuideDTO() {
         return this.guideDTO;
+    }
+
+    /**
+     * Gets and returns the tours that are held by the guide.
+     * 
+     * @return a <code>List</code> of {@link TourDTO}:s.
+     * @throws SQLException if the query to the database failed.
+     */
+    public List<TourDTO> getTours() throws SQLException {
+        DBHandler handler = DBHandler.getDbhandler();
+        return handler.getGuideTours(this.guideDTO);
+    }
+
+    /**
+     * Adds a tour with the user by sending the guide information and the tour to
+     * {@link DBHandler}.
+     * 
+     * @param tour the tour to be added.
+     * @throws NoResultException if the tour was not added.
+     * @throws SQLException      if the query to the database failed.
+     */
+    public void addTour(TourDTO tour) throws NoResultException, SQLException {
+        DBHandler handler = DBHandler.getDbhandler();
+        int rowCount = handler.addGuideTour(this.guideDTO, tour);
+        if (rowCount == 0) {
+            throw new NoResultException("Could not add the tour with the guide!");
+        }
+    }
+
+    /**
+     * Removes the tour that is held by the guide by sending information to
+     * {@link DBHandler}.
+     * 
+     * @param tour the tour to be removed.
+     * @throws NoResultException if the tour was not removed.
+     * @throws SQLException      if the query to the database failed.
+     */
+    public void removeTour(TourDTO tour) throws NoResultException, SQLException {
+        DBHandler handler = DBHandler.getDbhandler();
+        int rowCount = handler.removeGuideTour(this.guideDTO, tour);
+        if (rowCount == 0) {
+            throw new NoResultException("Could not remove the tour with the guide!");
+        }
     }
 }

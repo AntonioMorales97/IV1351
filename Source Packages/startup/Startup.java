@@ -10,6 +10,11 @@ import view.MainApp;
  */
 public class Startup {
 
+    /**
+     * Sets up connection to the database and launches the Application (GUI).
+     * 
+     * @param args Not used.
+     */
     public static void main(String[] args) {
         try {
             DBAccess db = DBAccess.getDBAccess();

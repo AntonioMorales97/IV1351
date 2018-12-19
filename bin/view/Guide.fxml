@@ -99,5 +99,15 @@
       </Text>
       <Button layoutX="671.0" layoutY="183.0" mnemonicParsing="false" onAction="#removeLanguage" prefHeight="26.0" prefWidth="74.0" text="Ta bort" />
       <Button layoutX="427.0" layoutY="401.0" mnemonicParsing="false" onAction="#removeShow" text="Ta bort" />
+      <Button layoutX="552.0" layoutY="316.0" mnemonicParsing="false" onAction="#goToGuideTours" prefHeight="26.0" prefWidth="138.0" text="Turer">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <Text layoutX="497.0" layoutY="304.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Klicka på Turer för att gå till guidens turer">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Text>
    </children>
 </AnchorPane>

@@ -3,6 +3,7 @@ package integration;
 import dto.GuideDTO;
 import dto.LanguageDTO;
 import dto.ShowDTO;
+import dto.TourDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -237,7 +238,7 @@ public class DBHandler {
      * by the given guide in the given language.
      * 
      * @param guide The given guide.
-     * @param lang The given language.
+     * @param lang  The given language.
      * @return the number of rows in the table returned by the query.
      * @throws SQLException if the query to the database fails.
      */
@@ -278,7 +279,7 @@ public class DBHandler {
      * by the given guide in the given show.
      * 
      * @param guide The given guide.
-     * @param show The given show.
+     * @param show  The given show.
      * @return the number of rows in the table returned by the query.
      * @throws SQLException if the query to the database fails.
      */
@@ -293,4 +294,73 @@ public class DBHandler {
         return rs.getInt("Turer");
     }
 
+    /**
+     * Executes a query to the database to get all of the tours that are held by the
+     * given guide.
+     * 
+     * @param guide The given guide.
+     * @return an <ArrayList> of {@link TourDTO}.
+     * @throws SQLException if the query to the database fails.
+     */
+    public ArrayList<TourDTO> getGuideTours(GuideDTO guide) throws SQLException {
+        Connection con = db.getDBConnection();
+        String query = "SELECT tid, datum, språk, längd, id AS utställningsid, namn AS utställningsnamn, startdatum, slutdatum FROM Tur, Utställning WHERE Tur.guide = ? AND Tur.utställning = Utställning.id ORDER BY Tur.datum, Tur.tid";
+        PreparedStatement stmt = con.prepareStatement(query);
+        stmt.setString(1, guide.getPersonnr());
+        ResultSet rs = stmt.executeQuery();
+        ArrayList<TourDTO> result = new ArrayList<>();
+        while (rs.next()) {
+            result.add(new TourDTO(rs.getString("tid"), rs.getString("datum"), rs.getString("språk"),
+                    rs.getString("längd"), new ShowDTO(rs.getString("utställningsnamn"), rs.getInt("utställningsid"),
+                            rs.getString("startdatum"), rs.getString("slutdatum"))));
+        }
+        return result;
+    }
+
+    /**
+     * Executes a query to the database to add the given tour with the given guide
+     * into the database.
+     * 
+     * @param guide The given guide.
+     * @param tour  The given tour.
+     * @return the number of rows affected, which can be 1 or 0.
+     * @throws SQLException if the query to the database fails.
+     */
+    public int addGuideTour(GuideDTO guide, TourDTO tour) throws SQLException {
+        Connection con = db.getDBConnection();
+        String query = "INSERT INTO tur (guide, tid, datum, språk, längd, utställning) VALUES (?, ?, ?, ?, ?, ?)";
+        PreparedStatement stmt = con.prepareStatement(query);
+        stmt.setString(1, guide.getPersonnr());
+        stmt.setString(2, tour.getTourTime());
+        stmt.setString(3, tour.getTourDate());
+        stmt.setString(4, tour.getTourLanguage());
+        stmt.setString(5, tour.getTourLength());
+        stmt.setInt(6, tour.getShowDTO().getID());
+        int res = stmt.executeUpdate();
+        stmt.close();
+        con.commit();
+        return res;
+    }
+
+    /**
+     * Executes a query to the database to remove the given tour with the given
+     * guide from the database.
+     * 
+     * @param guide The given guide.
+     * @param tour  The tour to be removed.
+     * @return the number of rows affected, which can be 1 or 0.
+     * @throws SQLException if the query to the database fails.
+     */
+    public int removeGuideTour(GuideDTO guide, TourDTO tour) throws SQLException {
+        Connection con = db.getDBConnection();
+        String query = "DELETE FROM tur WHERE guide = ? AND tid = ? AND datum = ?";
+        PreparedStatement stmt = con.prepareStatement(query);
+        stmt.setString(1, guide.getPersonnr());
+        stmt.setString(2, tour.getTourTime());
+        stmt.setString(3, tour.getTourDate());
+        int res = stmt.executeUpdate();
+        stmt.close();
+        con.commit();
+        return res;
+    }
 }
