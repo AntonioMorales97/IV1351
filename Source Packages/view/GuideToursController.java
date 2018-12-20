@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 import controller.Controller;
 import dto.LanguageDTO;
@@ -14,6 +15,8 @@ import dto.PotentialDTO;
 import dto.ShowDTO;
 import dto.TourDTO;
 import exception.NoResultException;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,9 +30,11 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
+import javafx.util.converter.IntegerStringConverter;
 import model.Guide;
 import model.TourDateValidator;
 import util.AlertMaker;
@@ -45,6 +50,8 @@ public class GuideToursController implements Initializable {
     private ObservableList<LanguageDTO> languages;
     private ObservableList<ShowDTO> shows;
     private ObservableList<TourDTO> tours;
+    
+    private final int LIMIT = 2;
 
     /**
      * This is not used here. This is used to reduce calls to the database when
@@ -257,6 +264,35 @@ public class GuideToursController implements Initializable {
         tourLengthColumn.setCellValueFactory(new PropertyValueFactory<>("tourLength"));
         tourLanguageColumn.setCellValueFactory(new PropertyValueFactory<>("tourLanguage"));
         this.datePicker.setDisable(true);
+        
+        setTextFieldLengthAndFormat(this.tourLengthHour);
+        setTextFieldLengthAndFormat(this.tourLengthMinute);
+        setTextFieldLengthAndFormat(this.tourStartTimeHour);
+        setTextFieldLengthAndFormat(this.tourStartTimeMinute);
+    }
+    
+    private void setTextFieldLengthAndFormat(TextField tf) {
+        tf.lengthProperty().addListener(new ChangeListener<Number>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Number> observable,
+                    Number oldValue, Number newValue) {
+                if (newValue.intValue() > oldValue.intValue()) {
+                    // Check if the new character length is greater than LIMIT
+                    if (tf.getText().length() >= LIMIT) {
+                        //if it's LIMIT+1 characters => setText to previous one
+                        tf.setText(tf.getText().substring(0, LIMIT));
+                    }
+                }
+            }
+        });
+        
+        //Update TextField with numbers only
+        TextFormatter<Integer> formatter = new TextFormatter<>(
+                new IntegerStringConverter(),
+                null,
+                c -> Pattern.matches("\\d*", c.getText()) ? c : null);
+        tf.setTextFormatter(formatter);
     }
 
     void setUpToursPage(Guide guide, ObservableList<LanguageDTO> languages, ObservableList<ShowDTO> shows,
